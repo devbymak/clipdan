@@ -151,7 +151,7 @@ final class ClipModel: ObservableObject {
         didSet { defaults.set(movesPastedToTop, forKey: "movesPastedToTop") }
     }
     /// Keeps the bezel open after the shortcut's keys are let go, until a clipping is chosen.
-    @Published var sticky = UserDefaults.standard.bool(forKey: "sticky") {
+    @Published var sticky = UserDefaults.standard.object(forKey: "sticky") as? Bool ?? true {
         didSet { defaults.set(sticky, forKey: "sticky") }
     }
     /// While paused, copies are not kept.

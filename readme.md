@@ -15,11 +15,11 @@
   <img src="assets/cover.png" alt="Clipdan on a Mac: the menu bar menu listing recent clippings, including an image with its thumbnail and a pinned Persian message, and the bezel showing a copied picture, next to a list of features">
 </p>
 
-**Clipdan** (کلیپ‌دان, "clip holder": the English *clip* with the Persian *-dan*, a holder, as in نمکدان, the salt holder) is a small, native macOS menu bar app that remembers what you copy. It works like [Flycut](https://apps.apple.com/us/app/flycut-clipboard-manager/id442160987): press <kbd>⇧</kbd><kbd>⌘</kbd><kbd>V</kbd>, keep holding <kbd>⇧</kbd><kbd>⌘</kbd> and tap <kbd>V</kbd> to go back through your clippings, then let go to paste. Unlike Flycut, it also keeps **images**: screenshots, pictures copied from a browser, Preview, Photos, or a design app.
+**Clipdan** (کلیپ‌دان, "clip holder": the English *clip* with the Persian *-dan*, a holder, as in نمکدان, the salt holder) is a small, native macOS menu bar app that remembers what you copy. It works like [Flycut](https://apps.apple.com/us/app/flycut-clipboard-manager/id442160987): press <kbd>⇧</kbd><kbd>⌘</kbd><kbd>V</kbd>, keep holding <kbd>⇧</kbd><kbd>⌘</kbd> and tap <kbd>V</kbd> to go back through your clippings, then press <kbd>Return</kbd> to paste. Unlike Flycut, it also keeps **images**: screenshots, pictures copied from a browser, Preview, Photos, or a design app.
 
 ## Why Clipdan
 
-- ⌨️ **Flycut-style bezel.** One shortcut shows your newest clipping. Tap <kbd>V</kbd> again for older ones, or use the arrow keys, number keys or scroll wheel, then let go to paste.
+- ⌨️ **Flycut-style bezel.** One shortcut shows your newest clipping. Tap <kbd>V</kbd> again for older ones, or use the arrow keys, number keys or scroll wheel, then press <kbd>Return</kbd> to paste.
 - 🖼️ **Images too.** Screenshots and copied pictures are kept as PNG, with thumbnails in the menu and a full preview in the bezel. They paste back into any app.
 - 📋 **Menu bar history.** Click the clipboard icon for your recent clippings. Press <kbd>1</kbd> to <kbd>0</kbd> to paste one, or hold <kbd>⌥</kbd> to delete one.
 - 🔎 **Search and pin.** Type to search in the bezel. Pin a clipping with <kbd>⌘</kbd><kbd>P</kbd> to keep it however much you copy.
@@ -45,7 +45,8 @@ The first time it opens, macOS asks whether Clipdan may control your computer. T
 | Key | What it does |
 | --- | --- |
 | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>V</kbd> | Show the bezel with your newest clipping. Press <kbd>V</kbd> again for older ones. |
-| Let go of <kbd>⇧</kbd><kbd>⌘</kbd> | Paste the clipping shown. |
+| <kbd>Return</kbd> | Paste the clipping shown. |
+| Type | Search your clippings. |
 | <kbd>↑</kbd> <kbd>↓</kbd> or scroll | Browse newer and older clippings. |
 | <kbd>⌘</kbd><kbd>1</kbd> to <kbd>⌘</kbd><kbd>0</kbd> | Jump to the first to tenth clipping. |
 | <kbd>⌘</kbd><kbd>C</kbd> | Copy the clipping shown without pasting it. |
@@ -53,7 +54,7 @@ The first time it opens, macOS asks whether Clipdan may control your computer. T
 | <kbd>⌘</kbd><kbd>⌫</kbd> | Delete it. |
 | <kbd>esc</kbd> | Close without pasting. |
 
-Prefer the bezel to stay open? Turn on **Keep open until you choose** in Settings. Then you can type to search and press <kbd>Return</kbd> to paste. **Search Clippings…** in the menu opens it that way too. You can change the shortcut in Settings → General.
+The bezel stays open until you choose a clipping. Prefer Flycut's way, where letting go of <kbd>⇧</kbd><kbd>⌘</kbd> pastes? Turn off **Keep open until you choose** in Settings. **Search Clippings…** in the menu keeps it open either way. You can change the shortcut in Settings → General.
 
 ## Privacy
 
