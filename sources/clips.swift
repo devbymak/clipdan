@@ -129,6 +129,9 @@ enum Capture {
     static let textLimit = 2_000_000
     /// Larger images are not kept.
     static let imageLimit = 50_000_000
+    /// Nor are images with more pixels: a small compressed file can hold a huge picture, and converting it decodes every
+    /// pixel at once, at 4 bytes each.
+    static let pixelLimit = 100_000_000
 
     enum Decision: Equatable {
         case text(String)
@@ -171,7 +174,7 @@ struct CapturedImage: Equatable {
               let source = CGImageSourceCreateWithData(data as CFData, nil), CGImageSourceGetCount(source) > 0,
               let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
               let width = properties[kCGImagePropertyPixelWidth] as? Int, let height = properties[kCGImagePropertyPixelHeight] as? Int,
-              width > 0, height > 0 else { return nil }
+              width > 0, height > 0, width <= Capture.pixelLimit / height else { return nil }
         var png = data
         if type != UTType.png.identifier {
             guard let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return nil }

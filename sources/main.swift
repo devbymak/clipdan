@@ -238,19 +238,25 @@ final class ClipModel: ObservableObject {
         guard count != ownChangeCount, !paused else { return }
         // At launch, the app in front didn't necessarily copy what's there. While the screen is locked, the login window is.
         let front = NSWorkspace.shared.frontmostApplication
-        capture(pasteboard, source: first || front?.bundleIdentifier == "com.apple.loginwindow" ? nil : front?.localizedName)
+        capture(pasteboard, changeCount: count, source: first || front?.bundleIdentifier == "com.apple.loginwindow" ? nil : front?.localizedName)
     }
-    private func capture(_ pasteboard: NSPasteboard, source: String?) {
+    private func capture(_ pasteboard: NSPasteboard, changeCount: Int, source: String?) {
         let types = pasteboard.types?.map(\.rawValue) ?? []
         // Checked before reading anything, so a password is never even read.
         guard !types.contains(where: Capture.skippedTypes.contains) else { return }
         let date = Date()
-        switch Capture.decide(types: types, string: pasteboard.string(forType: .string), keepsImages: keepsImages) {
+        let decision = Capture.decide(types: types, string: pasteboard.string(forType: .string), keepsImages: keepsImages)
+        var imageData: Data?
+        if case .image(let type) = decision { imageData = pasteboard.data(forType: NSPasteboard.PasteboardType(type)) }
+        // Another copy, maybe a password, can land between the reads above; what was read then may not be what the types
+        // described. It's dropped, and the next check reads the new copy from the start.
+        guard pasteboard.changeCount == changeCount else { return }
+        switch decision {
         case .skip: return
         case .text(let text):
             captureQueue.async { [weak self] in DispatchQueue.main.async { self?.add(.text(text, source: source, date: date), png: nil) } }
         case .image(let type):
-            guard let data = pasteboard.data(forType: NSPasteboard.PasteboardType(type)) else { return }
+            guard let data = imageData else { return }
             captureQueue.async { [weak self] in
                 guard let image = CapturedImage(data: data, type: type) else { return }
                 DispatchQueue.main.async { self?.add(.image(image, source: source, date: date), png: image.png) }
@@ -785,7 +791,7 @@ struct SettingsView: View {
             }
             Toggle(isOn: $model.keepsImages) {
                 Text("Keep images")
-                Text("Screenshots and copied pictures, up to 50 MB each. Turning this off removes images you haven't pinned.")
+                Text("Screenshots and copied pictures, up to 50 MB and 100 megapixels each. Turning this off removes images you haven't pinned.")
             }
         } footer: {
             footer("Pinned clippings are kept on top of this number. Pin one with ⌘P in the bezel.")

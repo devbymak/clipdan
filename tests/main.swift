@@ -21,6 +21,17 @@ func encodedImage(width: Int, height: Int, type: UTType, gray: CGFloat = 0.5) ->
     CGImageDestinationFinalize(destination)
     return output as Data
 }
+/// A plain gray PNG with one row more than `Capture.pixelLimit` allows, built in grayscale to keep it to about 100 MB.
+func oversizedPNG() -> Data {
+    let width = 10_000, height = Capture.pixelLimit / width + 1
+    let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                            space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue)!
+    let output = NSMutableData()
+    let destination = CGImageDestinationCreateWithData(output, UTType.png.identifier as CFString, 1, nil)!
+    CGImageDestinationAddImage(destination, context.makeImage()!, nil)
+    CGImageDestinationFinalize(destination)
+    return output as Data
+}
 
 // What gets kept
 check(Capture.decide(types: ["public.utf8-plain-text"], string: "hello", keepsImages: true) == .text("hello"), "Plain text is kept")
@@ -84,6 +95,9 @@ check(captured.png.starts(with: [0x89, 0x50, 0x4E, 0x47]), "TIFF is stored as PN
 let png = encodedImage(width: 8, height: 8, type: .png)
 check(CapturedImage(data: png, type: UTType.png.identifier)?.png == png, "PNG is kept as it is")
 check(CapturedImage(data: Data("not an image".utf8), type: UTType.png.identifier) == nil, "Junk is rejected")
+let oversized = oversizedPNG()
+check(oversized.count < 1_000_000 && CapturedImage(data: oversized, type: UTType.png.identifier) == nil,
+      "A small file holding too many pixels is rejected")
 check(CapturedImage(data: tiff, type: UTType.tiff.identifier)?.digest == captured.digest, "The same image has the same digest")
 let other = CapturedImage(data: encodedImage(width: 30, height: 20, type: .tiff, gray: 0.9), type: UTType.tiff.identifier)!
 check(other.digest != captured.digest, "Different images differ")
