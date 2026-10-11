@@ -180,6 +180,8 @@ final class ClipModel: ObservableObject {
     private var ownChangeCount = -1
     /// Captures go through one queue so they're added in the order they were copied, even when an image takes a moment.
     private let captureQueue = DispatchQueue(label: "local.clipdan.capture", qos: .userInitiated)
+    /// Bytes of copied images waiting on the capture queue. Changed on the main thread only.
+    private var pendingImageBytes = 0
     private let thumbnails = NSCache<NSString, NSImage>()
     private var tiffProvider: TIFFProvider?
 
@@ -269,11 +271,17 @@ final class ClipModel: ObservableObject {
         case .skip: return
         case .text(let text):
             captureQueue.async { [weak self] in DispatchQueue.main.async { self?.add(.text(text, source: source, date: date), png: nil) } }
-        case .image(let type):
-            guard let data = imageData else { return }
+        case .image:
+            guard let data = imageData, data.count <= Capture.imageLimit,
+                  pendingImageBytes + data.count <= Capture.pendingLimit else { return }
+            pendingImageBytes += data.count
             captureQueue.async { [weak self] in
-                guard let image = CapturedImage(data: data, type: type) else { return }
-                DispatchQueue.main.async { self?.add(.image(image, source: source, date: date), png: image.png) }
+                let image = CapturedImage(data: data)
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    self.pendingImageBytes -= data.count
+                    if let image { self.add(.image(image, source: source, date: date), png: image.png) }
+                }
             }
         }
     }
@@ -601,8 +609,11 @@ final class BezelController {
         case kVK_Home: bezel.selection = 0
         case kVK_End: bezel.selection = max(bezel.clips.count - 1, 0)
         case kVK_Delete, kVK_ForwardDelete:
-            if !command, !bezel.query.isEmpty { bezel.query.removeLast(); reload() }
-            else if let clip = bezel.current { model.remove(clip.id); reload() }
+            switch DeleteKey.action(command: command, query: bezel.query) {
+            case .clipping: if let clip = bezel.current { model.remove(clip.id); reload() }
+            case .character: bezel.query.removeLast(); reload()
+            case .nothing: break
+            }
         default:
             if let digit = Self.digits[Int(event.keyCode)], command {
                 bezel.selection = step(digit == 0 ? 9 : digit - 1, by: 0, count: bezel.clips.count)
@@ -1050,20 +1061,23 @@ if arguments.contains("--list") {
     if clips.isEmpty { print("No saved clippings in \(ClipModel.folder.path)") }
     for (index, clip) in clips.enumerated() {
         let content = clip.kind == .image ? "\(clip.imageTitle) · \(Format.bytes(clip.bytes))" : Format.line(clip.text, length: 60)
-        let details = ([clip.source].compactMap { $0 } + [Format.age(Date().timeIntervalSince(clip.date))]).joined(separator: " · ")
+        // Through Format.line, like the content, so no control characters reach the terminal.
+        let source = clip.source.map { Format.line($0, length: 60) }
+        let details = ([source].compactMap { $0 } + [Format.age(Date().timeIntervalSince(clip.date))]).joined(separator: " · ")
         print("\(String(format: "%3d", index + 1)). \(clip.pinned ? "📌 " : "")\(content)  (\(details))")
     }
 } else if arguments.contains("--probe") {
     // Describes what's on the clipboard now, and what Clipdan would keep, without printing the content itself.
     let pasteboard = NSPasteboard.general
     let types = pasteboard.types?.map(\.rawValue) ?? []
-    print("Types: \(types.joined(separator: ", "))")
+    // Any app can name a type, so the names go through Format.line too.
+    print("Types: \(types.map { Format.line($0, length: 200) }.joined(separator: ", "))")
     print("Clipboard access: \(ClipboardAccess.current.title)")
     switch Capture.decide(types: types, string: pasteboard.string(forType: .string), keepsImages: true) {
     case .skip: print("Clipdan would skip this.")
     case .text(let text): print("Clipdan would keep text: \(Format.count(text.count, "character")).")
     case .image(let type):
-        let image = pasteboard.data(forType: NSPasteboard.PasteboardType(type)).flatMap { CapturedImage(data: $0, type: type) }
+        let image = pasteboard.data(forType: NSPasteboard.PasteboardType(type)).flatMap { CapturedImage(data: $0) }
         print(image.map { "Clipdan would keep an image: \($0.width) × \($0.height), \(Format.bytes($0.png.count)) as PNG." }
               ?? "Clipdan can't read this \(type) image.")
     }

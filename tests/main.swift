@@ -100,17 +100,22 @@ check(searchable.search("دنیا").count == 1 && searchable.search("  ").count 
 
 // Images
 let tiff = encodedImage(width: 30, height: 20, type: .tiff)
-guard let captured = CapturedImage(data: tiff, type: UTType.tiff.identifier) else { fatalError("FAILED: TIFF converts") }
+guard let captured = CapturedImage(data: tiff) else { fatalError("FAILED: TIFF converts") }
 check(captured.width == 30 && captured.height == 20, "Image size is read")
 check(captured.png.starts(with: [0x89, 0x50, 0x4E, 0x47]), "TIFF is stored as PNG")
 let png = encodedImage(width: 8, height: 8, type: .png)
-check(CapturedImage(data: png, type: UTType.png.identifier)?.png == png, "PNG is kept as it is")
-check(CapturedImage(data: Data("not an image".utf8), type: UTType.png.identifier) == nil, "Junk is rejected")
+check(CapturedImage(data: png)?.png == png, "PNG is kept as it is")
+check(CapturedImage(data: Data("not an image".utf8)) == nil, "Junk is rejected")
+let jpeg = encodedImage(width: 8, height: 8, type: .jpeg)
+check(CapturedImage(data: jpeg).map { $0.png != jpeg && $0.png.starts(with: [0x89, 0x50, 0x4E, 0x47]) } == true,
+      "The data, not its label, decides whether it's PNG, so JPEG labeled as PNG is converted")
+let jpeg2000 = encodedImage(width: 8, height: 8, type: UTType("public.jpeg-2000")!)
+check(!jpeg2000.isEmpty && CapturedImage(data: jpeg2000) == nil, "Formats Clipdan doesn't keep are never decoded")
 let oversized = oversizedPNG()
-check(oversized.count < 1_000_000 && CapturedImage(data: oversized, type: UTType.png.identifier) == nil,
+check(oversized.count < 1_000_000 && CapturedImage(data: oversized) == nil,
       "A small file holding too many pixels is rejected")
-check(CapturedImage(data: tiff, type: UTType.tiff.identifier)?.digest == captured.digest, "The same image has the same digest")
-let other = CapturedImage(data: encodedImage(width: 30, height: 20, type: .tiff, gray: 0.9), type: UTType.tiff.identifier)!
+check(CapturedImage(data: tiff)?.digest == captured.digest, "The same image has the same digest")
+let other = CapturedImage(data: encodedImage(width: 30, height: 20, type: .tiff, gray: 0.9))!
 check(other.digest != captured.digest, "Different images differ")
 check(CapturedImage.thumbnail(captured.png, maxPixels: 10).map { $0.width == 10 && $0.height == 7 } == true, "Thumbnails keep the shape")
 var mixed = ClipHistory(limit: 5)
@@ -170,6 +175,12 @@ check(Format.isRightToLeft("  «سلام» hello") && Format.isRightToLeft("של
 check(Format.age(5) == "just now" && Format.age(125) == "2 min ago" && Format.age(7200) == "2 h ago"
       && Format.age(90_000) == "yesterday" && Format.age(3 * 86_400) == "3 days ago", "Ages")
 check(Format.count(1, "clipping") == "1 clipping" && Format.count(2, "image") == "2 images", "Counts")
+check(Format.line("a\u{1B}]52;c;aGk=\u{07}b", length: 40) == "a ]52;c;aGk= b", "Terminal escapes are removed")
+check(Format.line("کلیپ\u{200C}دان", length: 40) == "کلیپ\u{200C}دان", "The Persian zero-width non-joiner is kept")
+check(DeleteKey.action(command: true, query: "") == .clipping && DeleteKey.action(command: true, query: "ab") == .clipping,
+      "⌘⌫ deletes the clipping")
+check(DeleteKey.action(command: false, query: "ab") == .character && DeleteKey.action(command: false, query: "") == .nothing,
+      "Plain ⌫ edits the search and never deletes a clipping")
 check(step(0, by: -1, count: 3) == 0 && step(2, by: 1, count: 3) == 2 && step(1, by: 1, count: 3) == 2 && step(0, by: 1, count: 0) == 0,
       "Selection stops at the ends")
 

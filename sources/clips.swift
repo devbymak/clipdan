@@ -144,6 +144,9 @@ enum Capture {
     static let textLimit = 2_000_000
     /// Larger images are not kept.
     static let imageLimit = 50_000_000
+    /// Images still waiting to be converted may take this many bytes together. More copied meanwhile are not kept, so
+    /// a burst of huge copies can't fill memory.
+    static let pendingLimit = 200_000_000
     /// Nor are images with more pixels: a small compressed file can hold a huge picture, and converting it decodes every
     /// pixel at once, at 4 bytes each.
     static let pixelLimit = 100_000_000
@@ -182,16 +185,20 @@ struct CapturedImage: Equatable {
     let height: Int
     let digest: String
 
-    /// Converts any image ImageIO reads, such as TIFF from a screenshot, to PNG, which is several times smaller.
-    /// PNG data is kept as it is. Returns nil for data that isn't an image or is too large.
-    init?(data: Data, type: String) {
+    /// Converts an image in one of `Capture.imageTypes`, such as TIFF from a screenshot, to PNG, which is several times
+    /// smaller. PNG data is kept as it is. Returns nil for data that isn't such an image or is too large.
+    init?(data: Data) {
+        // Any app can put data on the pasteboard, and ImageIO reads dozens of formats whatever the data is labeled as.
+        // Only the formats Clipdan keeps are decoded, judged by the data itself, so rarer and riskier decoders never run.
         guard data.count <= Capture.imageLimit,
-              let source = CGImageSourceCreateWithData(data as CFData, nil), CGImageSourceGetCount(source) > 0,
+              let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let format = CGImageSourceGetType(source) as String?, Capture.imageTypes.contains(format),
+              CGImageSourceGetCount(source) > 0,
               let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
               let width = properties[kCGImagePropertyPixelWidth] as? Int, let height = properties[kCGImagePropertyPixelHeight] as? Int,
               width > 0, height > 0, width <= Capture.pixelLimit / height else { return nil }
         var png = data
-        if type != UTType.png.identifier {
+        if format != UTType.png.identifier {
             guard let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return nil }
             let output = NSMutableData()
             guard let destination = CGImageDestinationCreateWithData(output, UTType.png.identifier as CFString, 1, nil) else { return nil }
@@ -345,11 +352,17 @@ enum Format {
     static func line(_ text: String, length: Int) -> String {
         // Only the start is shown, so a huge clipping is never scanned whole.
         let start = text.prefix(length * 4 + 256)
-        let collapsed = start.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+        // Control characters go too: printed to a terminal, as by --list, an escape starts a command sequence.
+        let collapsed = start.split { $0.isWhitespace || isControl($0) }.joined(separator: " ")
         let more = start.endIndex < text.endIndex
         if collapsed.isEmpty { return more ? "…" : text.isEmpty ? "(empty)" : "(spaces only)" }
         if collapsed.count > length { return String(collapsed.prefix(max(length - 1, 1))) + "…" }
         return more ? collapsed + "…" : collapsed
+    }
+    /// Whether the character is only control codes, such as escape or bell. Format characters, such as the zero-width
+    /// non-joiner in Persian, are not control codes.
+    static func isControl(_ character: Character) -> Bool {
+        character.unicodeScalars.allSatisfy { $0.properties.generalCategory == .control }
     }
     /// The start of the text for the bezel, with tabs as spaces and no blank lines at either end.
     static func block(_ text: String, length: Int = 3000) -> String {
@@ -380,6 +393,16 @@ enum Format {
     }
     static func bytes(_ count: Int) -> String { ByteCountFormatter.string(fromByteCount: Int64(count), countStyle: .file) }
     static func count(_ number: Int, _ noun: String) -> String { "\(number) \(noun)\(number == 1 ? "" : "s")" }
+}
+
+/// What ⌫ does in the bezel.
+enum DeleteKey: Equatable {
+    case clipping, character, nothing
+    /// With ⌘, or the shortcut's keys, held, it deletes the clipping. Otherwise it edits the search, and does nothing
+    /// once the search is empty, so pressing it once too often never deletes a clipping.
+    static func action(command: Bool, query: String) -> DeleteKey {
+        command ? .clipping : query.isEmpty ? .nothing : .character
+    }
 }
 
 /// Moves a selection through `count` items without wrapping around.
