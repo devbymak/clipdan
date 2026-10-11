@@ -764,7 +764,10 @@ struct SettingsView: View {
                     HStack {
                         Text(model.accessibilityAllowed ? "Allowed" : "Not allowed")
                             .foregroundStyle(model.accessibilityAllowed ? Color.secondary : .orange)
-                        if !model.accessibilityAllowed { Button("Open Settings", action: SystemSettings.openAccessibility) }
+                        if !model.accessibilityAllowed {
+                            // Asking first is what puts Clipdan in the list, so there's a switch to turn on.
+                            Button("Open Settings") { model.requestAccessibility(); SystemSettings.openAccessibility() }
+                        }
                     }
                 }
             }
