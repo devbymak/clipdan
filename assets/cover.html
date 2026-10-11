@@ -1,0 +1,201 @@
+<!doctype html>
+<!-- Source for cover.png. Render at 1200x654, 2x:
+     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+       --window-size=1200,654 --force-device-scale-factor=2 --screenshot=assets/cover.png assets/cover.html -->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Clipdan cover</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 654px; overflow: hidden; }
+  body {
+    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    color: #fff;
+    background:
+      radial-gradient(520px 420px at 1080px 690px, rgba(150, 90, 80, .55), transparent 70%),
+      radial-gradient(700px 500px at 140px 120px, rgba(60, 50, 140, .35), transparent 70%),
+      linear-gradient(160deg, #15163a 0%, #1b1838 55%, #241a33 100%);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Menu bar */
+  .menubar {
+    position: absolute; inset: 0 0 auto 0; height: 32px;
+    display: flex; align-items: center; padding: 0 20px 0 18px;
+    background: rgba(10, 10, 28, .55);
+    font-size: 13.5px; font-weight: 500;
+  }
+  .menubar .left { display: flex; gap: 22px; align-items: center; }
+  .menubar .apple { margin: -2px 2px 0 0; }
+  .menubar b { font-weight: 700; }
+  .menubar .right { margin-left: auto; display: flex; gap: 22px; align-items: center; }
+  .menubar .clip {
+    width: 32px; height: 26px; border-radius: 6px; background: rgba(255,255,255,.2);
+    display: grid; place-items: center;
+  }
+  .menubar svg { display: block; }
+
+  /* Left column */
+  .hero { position: absolute; left: 56px; top: 66px; width: 400px; }
+  .hero .icon img { display: block; width: 84px; height: 84px; margin-left: -6px; }
+  .hero h1 { font-size: 56px; font-weight: 800; letter-spacing: -1.5px; margin-top: 20px; line-height: 1; }
+  .hero .tag { font-size: 19px; color: rgba(255,255,255,.82); margin-top: 14px; line-height: 1.3; }
+  .features { list-style: none; margin-top: 26px; display: grid; gap: 11px; }
+  .features li { display: flex; gap: 14px; align-items: center; }
+  .features .fi {
+    flex: none; width: 40px; height: 40px; border-radius: 10px;
+    display: grid; place-items: center;
+  }
+  .features strong { display: block; font-size: 16.5px; font-weight: 700; }
+  .features span { display: block; font-size: 13px; color: rgba(255,255,255,.62); margin-top: 2px; }
+  .badges { display: flex; gap: 10px; margin-top: 24px; }
+  .badges span {
+    font-size: 13.5px; font-weight: 600; padding: 7px 13px;
+    border: 1.5px solid rgba(255,255,255,.28); border-radius: 999px;
+  }
+
+  /* Menu bar dropdown */
+  .menu {
+    position: absolute; top: 37px; right: 32px; width: 372px;
+    padding: 5px; border-radius: 11px;
+    background: rgba(38, 36, 58, .94);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 18px 50px rgba(0,0,0,.45);
+    font-size: 13.5px;
+  }
+  .menu .row {
+    height: 24px; display: flex; align-items: center; padding: 0 10px; border-radius: 5px;
+    white-space: nowrap;
+  }
+  .menu .row .t { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .menu .row .k { color: rgba(255,255,255,.5); margin-left: 14px; }
+  .menu .row.sel { background: #2f6fe0; height: 34px; }
+  .menu .row.sel .k { color: rgba(255,255,255,.8); }
+  .menu .thumb { width: 40px; height: 26px; border-radius: 4px; overflow: hidden; margin-right: 8px; flex: none; }
+  .menu .rtl { unicode-bidi: plaintext; text-align: left; }
+  .menu hr { border: 0; border-top: 1px solid rgba(255,255,255,.12); margin: 5px 6px; }
+  .menu .sc { color: rgba(255,255,255,.5); margin-left: 12px; }
+
+  /* Bezel */
+  .bezel {
+    position: absolute; left: 520px; top: 368px; width: 420px; height: 256px;
+    border-radius: 16px; padding: 12px 16px 10px;
+    background: rgba(28, 27, 36, .93);
+    border: 1px solid rgba(255,255,255,.1);
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+    display: flex; flex-direction: column;
+  }
+  .bezel .head { display: flex; font-size: 10.5px; color: rgba(255,255,255,.55); }
+  .bezel .head b { color: #fff; font-weight: 600; }
+  .bezel .head .meta { margin-left: auto; }
+  .bezel .pic { flex: 1; display: grid; place-items: center; padding: 8px 0; }
+  .bezel .pic svg { height: 180px; width: auto; border-radius: 3px; }
+  .bezel .keys { font-size: 9px; color: rgba(255,255,255,.4); text-align: center; word-spacing: 1px; }
+  .bezel .keys i { font-style: normal; margin: 0 4px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a5a9e"/>
+      <stop offset=".55" stop-color="#c47c8c"/>
+      <stop offset="1" stop-color="#e3a07c"/>
+    </linearGradient>
+    <symbol id="sunset" viewBox="0 0 1040 680">
+      <rect width="1040" height="680" fill="url(#sky)"/>
+      <circle cx="680" cy="400" r="120" fill="#f7d58c"/>
+      <path d="M0 480 C 200 360, 380 380, 560 430 S 900 500, 1040 450 L1040 680 L0 680 Z" fill="#3e3266"/>
+      <path d="M0 580 C 260 520, 520 560, 760 590 S 980 610, 1040 600 L1040 680 L0 680 Z" fill="#2e2650"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="menubar">
+  <div class="left">
+    <svg class="apple" width="14" height="17" viewBox="0 0 814 1000" fill="#fff"><path d="M788 341c-6 4-106 61-106 186 0 145 127 196 131 197-1 3-20 70-67 138-42 60-85 120-152 120s-84-39-161-39c-75 0-102 40-163 40s-104-56-153-125C61 778 15 652 15 532c0-193 126-296 249-296 66 0 121 43 162 43 39 0 101-46 176-46 29 0 131 3 186 108zM558 161c31-36 52-87 52-137 0-7-1-14-2-20-50 2-109 33-145 75-28 32-55 83-55 135 0 8 1 15 2 18 3 1 9 1 14 1 45 0 101-30 134-72z"/></svg>
+    <b>Finder</b><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Window</span><span>Help</span>
+  </div>
+  <div class="right">
+    <span class="clip">
+      <svg width="14" height="17" viewBox="0 0 14 17" fill="none" stroke="#fff" stroke-width="1.5">
+        <rect x="1" y="2.5" width="12" height="13.5" rx="2"/><rect x="4" y="1" width="6" height="3" rx="1" fill="#fff"/>
+        <path d="M4 8h6M4 11h6" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x=".75" y=".75" width="20" height="10.5" rx="3" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/><rect x="3" y="3" width="13" height="6" rx="1.5" fill="#fff"/><rect x="22" y="4" width="1.5" height="4" rx=".75" fill="#fff" fill-opacity=".6"/></svg>
+    <svg width="17" height="13" viewBox="0 0 17 13" fill="#fff"><path d="M8.5 13 5.6 9.9a4 4 0 0 1 5.8 0zM3.5 7.7a7 7 0 0 1 10 0l-1.1 1.2a5.4 5.4 0 0 0-7.8 0zM1.3 5.4a10.2 10.2 0 0 1 14.4 0l-1.1 1.2a8.6 8.6 0 0 0-12.2 0z"/></svg>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="1.7"><circle cx="5.8" cy="5.8" r="4.6"/><path d="m9.3 9.3 3.8 3.8" stroke-linecap="round"/></svg>
+    <span>Sun 9:41</span>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="icon"><img src="app-icon.png" alt=""></div>
+  <h1>Clipdan</h1>
+  <p class="tag">Your clipboard history, text and images,<br>one shortcut away.</p>
+  <ul class="features">
+    <li>
+      <div class="fi" style="background:rgba(240,120,80,.18)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f3895f" stroke-width="2.2"><path d="M9 9V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V9z"/></svg>
+      </div>
+      <div><strong>Flycut-style bezel</strong><span>Hold ⇧⌘, press V for older clippings, let go to paste</span></div>
+    </li>
+    <li>
+      <div class="fi" style="background:rgba(70,140,255,.2)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5aa0ff" stroke-width="2"><rect x="6" y="3" width="15" height="13" rx="2"/><path d="M3 7v11a2 2 0 0 0 2 2h12"/><circle cx="11" cy="8" r="1.6"/><path d="m6 15 5-4 4 3 6-4"/></svg>
+      </div>
+      <div><strong>Images too</strong><span>Screenshots and copied pictures, kept as PNG</span></div>
+    </li>
+    <li>
+      <div class="fi" style="background:rgba(190,80,255,.2)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c46bff" stroke-width="2.4"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5" stroke-linecap="round"/></svg>
+      </div>
+      <div><strong>Search and pin</strong><span>Find any clipping; pinned ones are always kept</span></div>
+    </li>
+    <li>
+      <div class="fi" style="background:rgba(80,200,120,.18)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5fd38a" stroke-width="2"><path d="M12 2.5 4 5.5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10v-6z"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9.5a2 2 0 0 1 4 0V11"/></svg>
+      </div>
+      <div><strong>Private by design</strong><span>Sandboxed, offline, skips passwords, no logs</span></div>
+    </li>
+    <li>
+      <div class="fi" style="background:rgba(240,90,60,.18)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#f26a43"><path d="M15.5 3c4 2.7 6 7 4.6 11.3.6.9.9 2 .7 3-1-1.2-2.4-1.3-3.6-1-3 1.3-7.2 1.1-11-1.7C4.5 13.2 3 11.6 2 10c3.6 2.8 8 4.3 11.3 2.9C10 10.5 7.2 7.5 5 4.8c2.3 2 5 3.9 7.6 5.3-1.7-1.8-3.3-4-4.4-5.9 3 2.8 6.4 5.5 9 6.4.6-2.6-.2-5.2-1.7-7.6z"/></svg>
+      </div>
+      <div><strong>Native and lightweight</strong><span>Pure Swift, no dependencies, free and open source</span></div>
+    </li>
+  </ul>
+  <div class="badges"><span>macOS 13+</span><span>Apple Silicon</span><span>MIT License</span></div>
+</div>
+
+<div class="menu">
+  <div class="row"><span class="t">func greet(_ name: String) -&gt; Str...</span><span class="k">1</span></div>
+  <div class="row sel">
+    <span class="thumb"><svg width="40" height="26" preserveAspectRatio="xMidYMid slice"><use href="#sunset"/></svg></span>
+    <span class="t">Image · 1040 × 680 · Photos</span><span class="k">2</span>
+  </div>
+  <div class="row"><span class="t">Thanks, I'll send the final numbe...</span><span class="k">3</span></div>
+  <div class="row"><span class="t">https://github.com/devbymak/clipd...</span><span class="k">4</span></div>
+  <div class="row"><span class="t rtl">📌 سلام! جلسه‌ی فردا ساعت ۱۰ صبح است.</span><span class="k">5</span></div>
+  <div class="row"><span class="t">ssh deploy@build-01.internal</span><span class="k">6</span></div>
+  <hr>
+  <div class="row"><span class="t">Search Clippings… <span class="sc">⌘F</span></span></div>
+  <div class="row"><span class="t">Pause Clipdan</span></div>
+  <div class="row"><span class="t">Clear History…</span></div>
+  <hr>
+  <div class="row"><span class="t">Settings…</span></div>
+  <div class="row"><span class="t">Quit Clipdan</span></div>
+</div>
+
+<div class="bezel">
+  <div class="head"><b>2 of 6</b><span class="meta">1040 × 680 · 116 KB · Photos · 4 min ago</span></div>
+  <div class="pic"><svg viewBox="0 0 1040 680"><use href="#sunset"/></svg></div>
+  <div class="keys"><i>V or ↑↓ Browse</i><i>Let go to paste</i><i>⌘C Copy only</i><i>⌘P Pin</i><i>⌘⌫ Delete</i><i>esc Cancel</i></div>
+</div>
+
+</body>
+</html>

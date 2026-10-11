@@ -82,7 +82,7 @@ xcrun notarytool submit Clipdan.zip --keychain-profile <profile> --wait
 xcrun stapler staple Clipdan.app
 ```
 
-`assets/app-icon.swift` draws the app icon; run `xcrun swift assets/app-icon.swift assets/app-icon.png` to regenerate it. The cover uses demo data.
+`assets/app-icon.swift` draws the app icon; run `xcrun swift assets/app-icon.swift assets/app-icon.png` to regenerate it. `assets/cover.html` is the cover, with demo data; the command to render it to `assets/cover.png` is at the top of the file.
 
 </details>
 
