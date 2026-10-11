@@ -1,0 +1,8 @@
+Generated with the built-in image_gen tool.
+
+Use case: logo-brand
+Asset type: finished minimalist macOS app icon for Clipdan, a clipboard-history manager.
+Primary request: A very simple, immediately recognizable clipboard with one offset sheet behind it to suggest saved clipboard history. The front clipboard is a single broad warm amber rounded rectangular outline with a bold rounded clip at its top center. Its inside is empty midnight navy, with no writing and no pictures. The sheet behind appears only as a short pale cream offset top-right and right edge, clean and understated. Exactly one clipboard and one backing sheet, forming a single balanced emblem. Strong silhouette, broad consistent strokes, soft corners and generous negative space. Clearly a clipboard rather than a briefcase, phone, or padlock.
+Composition: centered emblem on a flat midnight navy #101B32 rounded-square macOS tile. Tile occupies 80 percent of square canvas, with true transparent margins outside it. Emblem occupies approximately 43 percent of canvas width and 48 percent of canvas height. Ample breathing room. Warm amber #F5B544 front clipboard and pale cream #EEE8D8 backing sheet.
+Style: precise minimalist flat geometric utility icon. Match a family of simple orange/blue transfer arrows and mint cooling fan on navy. Solid colors, crisp clean edges.
+Constraints: no image thumbnail, no mountains, no text lines, no writing, no letters, no clock, no history arrow, no extra symbol, no gradient, no shadow, no bevel, no gloss, no texture, no 3D, no mockup or presentation sheet, no watermark. Single finished app icon with actual transparency outside tile.
