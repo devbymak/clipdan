@@ -39,17 +39,26 @@ struct Clip: Codable, Identifiable, Equatable {
     }
     /// "Image · 1920 × 1080"
     var imageTitle: String { "Image · \(width) × \(height)" }
+    /// Bytes it takes to keep: the PNG for an image, the UTF-8 text otherwise.
+    var size: Int { kind == .image ? bytes : text.utf8.count }
 }
 
 /// Clippings, newest first.
 struct ClipHistory: Equatable {
     static let limitChoices = [10, 20, 40, 80, 100, 200]
+    static let sizeLimitChoices = [100, 250, 500, 1000, 2000, 5000].map { $0 * 1_000_000 }
+    static let standardSizeLimit = 500_000_000
     private(set) var clips: [Clip] = []
     /// How many unpinned clippings to keep. Pinned ones don't count.
     var limit: Int
+    /// How many bytes all clippings may take together. Pinned ones count, but only unpinned ones are dropped to make room.
+    var sizeLimit: Int
+    /// Bytes all clippings take together.
+    var size: Int { clips.reduce(0) { $0 + $1.size } }
 
-    init(limit: Int = 40, clips: [Clip] = []) {
+    init(limit: Int = 40, sizeLimit: Int = standardSizeLimit, clips: [Clip] = []) {
         self.limit = max(limit, 1)
+        self.sizeLimit = max(sizeLimit, 0)
         self.clips = clips
         _ = trim()
     }
@@ -88,7 +97,8 @@ struct ClipHistory: Equatable {
         clips.removeAll { !$0.pinned }
         return removed
     }
-    /// Drops the oldest unpinned clippings beyond the limit and returns them.
+    /// Drops the oldest unpinned clippings beyond the limit, then more until all fit in the size limit, and returns them.
+    /// The newest is always kept, so what was just copied is never lost.
     mutating func trim() -> [Clip] {
         var unpinned = 0
         var dropped: [Clip] = []
@@ -97,6 +107,11 @@ struct ClipHistory: Equatable {
             unpinned += 1
             if unpinned > limit { dropped.append(clip); return true }
             return false
+        }
+        var total = size
+        while total > sizeLimit, let index = clips.indices.dropFirst().last(where: { !clips[$0].pinned }) {
+            total -= clips[index].size
+            dropped.append(clips.remove(at: index))
         }
         return dropped
     }
@@ -260,9 +275,6 @@ final class ClipStore {
         guard let folder else { memory.removeAll(); return }
         queue.sync { try? FileManager.default.removeItem(at: folder) }
     }
-    /// Total size of the image data kept.
-    func imageBytes(of clips: [Clip]) -> Int { clips.filter { $0.kind == .image }.reduce(0) { $0 + $1.bytes } }
-
     private func imageURL(_ id: UUID, in images: URL) -> URL { images.appendingPathComponent("\(id.uuidString).png") }
 }
 

@@ -82,6 +82,17 @@ check(history.remove(history.clips[0].id)?.text == "six" && history.clips.isEmpt
 check(ClipHistory(limit: 2, clips: [.text("a"), .text("b"), .text("c")]).clips.count == 2, "Loaded history is trimmed to the limit")
 check(ClipHistory(limit: 0).limit == 1, "The limit is at least one")
 
+var sized = ClipHistory(limit: 10, sizeLimit: 10)
+sized.add(.text("aaaa")); sized.add(.text("bbbb"))
+check(texts(sized) == ["bbbb", "aaaa"] && sized.size == 8, "Clippings within the size limit are kept")
+check(sized.add(.text("cccc")).dropped.map(\.text) == ["aaaa"] && texts(sized) == ["cccc", "bbbb"], "The oldest are dropped to fit the size limit")
+sized.togglePin(sized.clips[1].id)
+sized.add(.text("dddddd"))
+check(texts(sized) == ["dddddd", "bbbb"], "Pinned clippings count toward the size limit but stay")
+sized.add(.text("a much longer clipping"))
+check(texts(sized) == ["a much longer clipping", "bbbb"], "The newest is kept even when it alone is over the size limit")
+check(Clip.text("سلام").size == 8, "Size counts UTF-8 bytes")
+
 var searchable = ClipHistory(limit: 10)
 searchable.add(.text("Hello World")); searchable.add(.text("hello there")); searchable.add(.text("سلام دنیا"))
 check(searchable.search("HELLO").count == 2 && searchable.search("world hello").count == 1, "Search ignores case and word order")

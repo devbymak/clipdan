@@ -57,7 +57,7 @@ Prefer the bezel to stay open? Turn on **Keep open until you choose** in Setting
 
 ## Privacy
 
-Clipdan never connects to the network: its sandbox doesn't allow it. It doesn't keep copies that password managers and other apps mark as confidential or temporary ([nspasteboard.org](http://nspasteboard.org) markers), and it doesn't keep anything while paused. Your history is saved only on your Mac, in `~/Library/Containers/local.clipdan`: up to the number of clippings you choose (40 by default), plus any you pin. Turn off **Save history** to keep clippings in memory only. Turning it off also deletes the saved copy.
+Clipdan never connects to the network: its sandbox doesn't allow it. It doesn't keep copies that password managers and other apps mark as confidential or temporary ([nspasteboard.org](http://nspasteboard.org) markers), and it doesn't keep anything while paused. Your history is saved only on your Mac, in `~/Library/Containers/local.clipdan`: up to the number of clippings you choose (40 by default), plus any you pin, and within the size limit you choose (500 MB by default). Over it, the oldest clippings you haven't pinned are removed. Turn off **Save history** to keep clippings in memory only. Turning it off also deletes the saved copy.
 
 <details>
 <summary><b>For developers</b></summary>

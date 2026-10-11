@@ -110,6 +110,16 @@ final class ClipModel: ObservableObject {
             forget(history.trim())
         }
     }
+    @Published var sizeLimit = ClipModel.savedSizeLimit {
+        didSet {
+            defaults.set(sizeLimit, forKey: "sizeLimit")
+            history.sizeLimit = sizeLimit
+            forget(history.trim())
+        }
+    }
+    private static var savedSizeLimit: Int {
+        ClipHistory.sizeLimitChoices.first { $0 == UserDefaults.standard.integer(forKey: "sizeLimit") } ?? ClipHistory.standardSizeLimit
+    }
     @Published var menuCount = ClipModel.menuCountChoices.first { $0 == UserDefaults.standard.integer(forKey: "menuCount") } ?? 10 {
         didSet { defaults.set(menuCount, forKey: "menuCount") }
     }
@@ -178,8 +188,12 @@ final class ClipModel: ObservableObject {
         if !saves { ClipStore(folder: Self.folder).erase() }
         store = ClipStore(folder: saves ? Self.folder : nil)
         let saved = store.load()
-        history = ClipHistory(limit: ClipHistory.limitChoices.first { $0 == UserDefaults.standard.integer(forKey: "limit") } ?? 40, clips: saved)
-        if history.clips.count != saved.count { save() }
+        history = ClipHistory(limit: ClipHistory.limitChoices.first { $0 == UserDefaults.standard.integer(forKey: "limit") } ?? 40,
+                              sizeLimit: Self.savedSizeLimit, clips: saved)
+        if history.clips.count != saved.count {
+            store.removeImages(of: saved.filter { !history.contains($0.id) })
+            save()
+        }
         thumbnails.countLimit = 80
         hotKey.onPress = { [weak self] in self?.onShortcut?() }
     }
@@ -329,7 +343,6 @@ final class ClipModel: ObservableObject {
         return thumbnail
     }
     var imageCount: Int { history.clips.filter { $0.kind == .image }.count }
-    var imageBytes: Int { store.imageBytes(of: history.clips) }
 
     // MARK: Permissions
 
@@ -797,6 +810,9 @@ struct SettingsView: View {
             footer("Pinned clippings are kept on top of this number. Pin one with ⌘P in the bezel.")
         }
         Section {
+            Picker("Size limit", selection: $model.sizeLimit) {
+                ForEach(ClipHistory.sizeLimitChoices, id: \.self) { Text(Format.bytes($0)).tag($0) }
+            }
             Toggle(isOn: $model.savesHistory) {
                 Text("Save history")
                 Text("Keep clippings when Clipdan quits or your Mac restarts. Turning this off deletes the saved copy.")
@@ -810,7 +826,7 @@ struct SettingsView: View {
         } header: {
             Text("Storage")
         } footer: {
-            footer("Saved only on this Mac, in Clipdan's sandbox container. Passwords and other copies that apps mark as confidential are never kept. Clipdan has no network access and writes no logs.")
+            footer("When clippings take more space than the size limit, the oldest ones you haven't pinned are removed. Saved only on this Mac, in Clipdan's sandbox container. Passwords and other copies that apps mark as confidential are never kept. Clipdan has no network access and writes no logs.")
         }
     }
 
@@ -824,7 +840,8 @@ struct SettingsView: View {
     }
     private var keptSummary: String {
         let clips = model.history.clips.count, images = model.imageCount
-        return images == 0 ? Format.count(clips, "clipping") : "\(Format.count(clips, "clipping")), \(Format.count(images, "image")) (\(Format.bytes(model.imageBytes)))"
+        let count = images == 0 ? Format.count(clips, "clipping") : "\(Format.count(clips, "clipping")), \(Format.count(images, "image"))"
+        return "\(count) (\(Format.bytes(model.history.size)))"
     }
     private func confirmClear() { ClearConfirmation.run(model) }
     private func warning(_ text: String) -> some View {
